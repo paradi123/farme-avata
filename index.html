@@ -6,7 +6,7 @@
   <title>Ghép Avatar với Khung</title>
   <style>
     body { text-align: center; font-family: Arial, sans-serif; }
-    canvas { border: 1px solid black; margin-top: 20px; }
+    canvas { border: 1px solid black; margin-top: 20px; cursor: pointer; }
     input[type="file"] { margin-top: 20px; }
   </style>
 </head>
@@ -50,6 +50,45 @@
       reader.readAsDataURL(e.target.files[0]);
     });
 
+    // Biến lưu trữ thông tin di chuyển và thay đổi kích thước
+    let isDragging = false;
+    let offsetX, offsetY;
+    let scale = 1;
+    let imageX = 0, imageY = 0;
+
+    // Xử lý sự kiện kéo và di chuyển ảnh
+    canvas.addEventListener('mousedown', function(e) {
+      if (e.offsetX >= imageX && e.offsetX <= imageX + imageSize * scale &&
+          e.offsetY >= imageY && e.offsetY <= imageY + imageSize * scale) {
+        isDragging = true;
+        offsetX = e.offsetX - imageX;
+        offsetY = e.offsetY - imageY;
+      }
+    });
+
+    // Xử lý sự kiện di chuyển ảnh
+    canvas.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        imageX = e.offsetX - offsetX;
+        imageY = e.offsetY - offsetY;
+        drawImageWithFrame();
+      }
+    });
+
+    // Xử lý sự kiện khi người dùng thả chuột
+    canvas.addEventListener('mouseup', function() {
+      isDragging = false;
+    });
+
+    // Xử lý thay đổi kích thước ảnh
+    canvas.addEventListener('wheel', function(e) {
+      if (e.ctrlKey) {
+        scale += e.deltaY * -0.01;  // Thay đổi tỷ lệ ảnh
+        scale = Math.min(Math.max(0.1, scale), 2);  // Giới hạn tỷ lệ thay đổi
+        drawImageWithFrame();
+      }
+    });
+
     // Vẽ ảnh lên canvas với khung
     function drawImageWithFrame() {
       // Đặt kích thước canvas phù hợp với khung
@@ -61,11 +100,8 @@
 
       // Vẽ ảnh cá nhân vào phần trống trong khung
       let imageSize = Math.min(canvas.width, canvas.height) / 2;  // Chỉnh kích thước ảnh cá nhân
-      let imageX = (canvas.width - imageSize) / 2;
-      let imageY = (canvas.height - imageSize) / 2;
-      
       ctx.globalCompositeOperation = 'destination-in';  // Chỉ vẽ phần ảnh bên trong khung
-      ctx.drawImage(uploadedImage, imageX, imageY, imageSize, imageSize);
+      ctx.drawImage(uploadedImage, imageX, imageY, imageSize * scale, imageSize * scale);
       ctx.globalCompositeOperation = 'source-over';  // Quay lại chế độ vẽ bình thường
     }
 
