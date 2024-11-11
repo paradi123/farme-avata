@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghép Avatar với Khung</title>
+  <style>
+    body { text-align: center; font-family: Arial, sans-serif; }
+    canvas { border: 1px solid black; margin-top: 20px; }
+    input[type="file"] { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Ghép Avatar với Khung</h1>
+  <input type="file" id="upload-image" accept="image/*"><br><br>
+  <canvas id="canvas"></canvas><br>
+  <button onclick="downloadImage()">Tải ảnh về</button>
+
+  <script>
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    let uploadedImage = new Image();
+    let uploadedFrame = new Image();
+    let frameLoaded = false;
+    let imageLoaded = false;
+
+    // Khung avatar đã được tải sẵn
+    uploadedFrame.src = 'khung.png';  // Đổi thành đường dẫn tới khung avatar của bạn
+
+    // Đảm bảo khung avatar đã được tải lên
+    uploadedFrame.onload = function() {
+      frameLoaded = true;
+      if (imageLoaded) {
+        drawImageWithFrame();
+      }
+    };
+
+    // Tải lên ảnh cá nhân
+    document.getElementById('upload-image').addEventListener('change', function(e) {
+      let reader = new FileReader();
+      reader.onload = function(event) {
+        uploadedImage.src = event.target.result;
+        uploadedImage.onload = function() {
+          imageLoaded = true;
+          if (frameLoaded) {
+            drawImageWithFrame();
+          }
+        };
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+
+    // Vẽ ảnh lên canvas với khung
+    function drawImageWithFrame() {
+      // Đặt kích thước canvas phù hợp với khung
+      canvas.width = uploadedFrame.width;
+      canvas.height = uploadedFrame.height;
+
+      // Vẽ khung lên canvas
+      ctx.drawImage(uploadedFrame, 0, 0, canvas.width, canvas.height);
+
+      // Vẽ ảnh cá nhân vào phần trống trong khung
+      let imageSize = Math.min(canvas.width, canvas.height) / 2;  // Chỉnh kích thước ảnh cá nhân
+      let imageX = (canvas.width - imageSize) / 2;
+      let imageY = (canvas.height - imageSize) / 2;
+      
+      ctx.globalCompositeOperation = 'destination-in';  // Chỉ vẽ phần ảnh bên trong khung
+      ctx.drawImage(uploadedImage, imageX, imageY, imageSize, imageSize);
+      ctx.globalCompositeOperation = 'source-over';  // Quay lại chế độ vẽ bình thường
+    }
+
+    // Tải ảnh đã ghép xuống
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'avatar_with_frame.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
