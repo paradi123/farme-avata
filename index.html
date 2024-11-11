@@ -5,16 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ghép Avatar với Khung</title>
   <style>
-    body { text-align: center; font-family: Arial, sans-serif; }
-    canvas { border: 1px solid black; margin-top: 20px; cursor: pointer; }
-    input[type="file"] { margin-top: 20px; }
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      margin-top: 20px;
+    }
+    .btn-container {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h1>Ghép Avatar với Khung</h1>
   <input type="file" id="upload-image" accept="image/*"><br><br>
   <canvas id="canvas"></canvas><br>
-  <button onclick="downloadImage()">Tải ảnh về</button>
+  <div class="btn-container">
+    <button onclick="downloadImage()">Tải ảnh về</button>
+    <button onclick="resetCanvas()">Làm lại</button>
+  </div>
 
   <script>
     let canvas = document.getElementById('canvas');
@@ -111,6 +131,14 @@
       link.download = 'avatar_with_frame.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
+    }
+
+    // Làm lại và tải lại khung
+    function resetCanvas() {
+      uploadedImage = new Image();  // Xóa ảnh cá nhân hiện tại
+      imageLoaded = false;
+      document.getElementById('upload-image').value = '';  // Xóa trường tải ảnh
+      ctx.clearRect(0, 0, canvas.width, canvas.height);  // Xóa canvas
     }
   </script>
 </body>
